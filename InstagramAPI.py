@@ -8,13 +8,13 @@ import hmac
 import urllib
 import uuid
 import time
-from ImageUtils import getImageSize
+from ImageUtils import get_image_size
 from requests_toolbelt import MultipartEncoder
 
 
 class InstagramAPI:
     API_URL = 'https://i.instagram.com/api/v1/'
-    DEVICE_SETTINTS = {
+    DEVICE_SETTINGS = {
         'manufacturer': 'Xiaomi',
         'model': 'HM 1SW',
         'android_version': 18,
@@ -22,7 +22,7 @@ class InstagramAPI:
     }
     USER_AGENT = ('Instagram 9.2.0 Android ({android_version}/{android_release}; '
                   '320dpi; 720x1280; '
-                  '{manufacturer}; {model}; armani; qcom; en_US)').format(**DEVICE_SETTINTS)
+                  '{manufacturer}; {model}; armani; qcom; en_US)').format(**DEVICE_SETTINGS)
     IG_SIG_KEY = '012a54f51c49aa8c5c322416ab1410909add32c966bbaa0fe3dc58ac43fd7ede'
     EXPERIMENTS = ('ig_android_progressive_jpeg,'
                    'ig_creation_growth_holdout,'
@@ -285,7 +285,7 @@ class InstagramAPI:
         return False
 
     def configure(self, upload_id, photo, caption=''):
-        (w, h) = getImageSize(photo)
+        (w, h) = get_image_size(photo)
         data = json.dumps({
             '_csrftoken': self.token,
             'media_folder': 'Instagram',
@@ -294,7 +294,7 @@ class InstagramAPI:
             '_uuid': self.uuid,
             'caption': caption,
             'upload_id': upload_id,
-            'device': self.DEVICE_SETTINTS,
+            'device': self.DEVICE_SETTINGS,
             'edits': {
                 'crop_original_size': [w * 1.0, h * 1.0],
                 'crop_center': [0.0, 0.0],
@@ -486,10 +486,12 @@ class InstagramAPI:
         # TODO Instagram.php 1160-1170
         return query
 
-    def get_timeline(self):
-        query = self._send_request('feed/timeline/?rank_token=' + str(self.rank_token) + '&ranked_content=true&')
-        # TODO Instagram.php 1180-1190
-        return query
+    def get_timeline(self, max_id=None):
+        query_string = dict(rank_token=str(self.rank_token), ranked_content='true')
+        if max_id:
+            query_string['max_id'] = max_id
+
+        return self._send_request('feed/timeline/?' + urllib.urlencode(query_string))
 
     def get_user_feed(self, usernameId, maxid='', minTimestamp=None):
         query = self._send_request(
