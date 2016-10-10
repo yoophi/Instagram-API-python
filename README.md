@@ -1,3 +1,23 @@
+
+# Instagram Private API
+
+like, follow, 사진 업로드 등 작업을 할 수 있는 인스타그램의 비공식 API 입니다. 
+
+<https://github.com/mgp25/Instagram-API> 의 python fork 입니다. 
+<https://github.com/LevPasha/Instagram-API-python>를 기반으로 조금 더 pythonic 하고
+사용하기 편하게 수정하고 있습니다.
+
+## 설치
+
+```bash
+$ pip install git+https://github.com/yoophi/ipa.git
+```
+
+
+아래는 원문의 README 입니다.
+
+----
+
 # Instagram-API-python
 <img src="https://img.shields.io/badge/Coverege-65%25-yellow.svg">
 <img src="https://img.shields.io/badge/Version-b%200.01-orange.svg">
