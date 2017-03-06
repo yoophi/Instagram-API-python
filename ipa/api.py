@@ -741,3 +741,30 @@ class InstagramAPI:
             for item in temp["items"]:
                 liked_items.append(item)
         return liked_items
+
+    def serialize(self):
+        if not self.s:
+            raise Exception('Not logged in')
+
+        return {
+            'token': self.token,
+            'username_id': self.username_id,
+            'rank_token': self.rank_token,
+            'uuid': self.uuid,
+            'user_agent': self.USER_AGENT,
+            'device_id': self.device_id,
+            'session': self.s.cookies.get_dict(),
+        }
+
+    def deserialize(self, data):
+        if not self.s:
+            self.s = requests.Session()
+
+        self.is_logged_in = True
+
+        for k in ['token', 'username_id', 'rank_token', 'uuid', 'user_agent', 'device_id']:
+            setattr(self, k, data.get(k))
+
+        for k, v in data.get('session').items():
+            self.s.cookies.set(k, v)
+
