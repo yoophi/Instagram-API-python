@@ -360,7 +360,35 @@ class InstagramAPI:
                                   self.generate_signature(data))
 
     def change_profile_picture(self, photo):
-        # TODO Instagram.php 705-775
+        u_data = json.dumps({
+            '_csrftoken': self.token,
+            '_uuid': self.uuid,
+            '_uid': self.username_id,
+        })
+
+        data = {
+            'ig_sig_key_version': self.SIG_KEY_VERSION,
+            'signed_body': hmac.new(self.IG_SIG_KEY.encode('utf-8'), u_data, hashlib.sha256).hexdigest() + u_data,
+
+            'image_compression': '{"lib_name":"jt","lib_version":"1.3.0","quality":"87"}',
+            'profile_pic': ('profile_pic', open(photo, 'rb'), 'application/octet-stream',
+                            {'Content-Transfer-Encoding': 'binary'})
+        }
+        m = MultipartEncoder(data, boundary=self.uuid)
+        self.s.headers.update({'Proxy-Connection': 'keep-alive',
+                               'Connection': 'keep-alive',
+                               'Accept': '*/*',
+                               'Accept-Language': 'en-en',
+                               'Content-type': m.content_type,
+                               'User-Agent': self.USER_AGENT})
+
+        response = self.s.post(self.API_URL + 'accounts/change_profile_picture/', data=m.to_string())
+        if response.status_code == 200:
+            self._last_response = response
+            self._last_json = json.loads(response.text)
+
+            return True
+
         return False
 
     def remove_profile_picture(self):
@@ -396,6 +424,15 @@ class InstagramAPI:
         return self._send_request('accounts/current_user/?edit=true', self.generate_signature(data))
 
     def edit_profile(self, url, phone, first_name, biography, email, gender):
+        """
+        :param url: string URL - website. "" for nothing
+        :param phone: string Phone number. "" for nothing
+        :param first_name: string Name. "" for nothing
+        :param biography: string Biography. "" for nothing
+        :param email: string Email. Required
+        :param gender: int Gender. mail = 1, female = 0
+        :return:
+        """
         data = json.dumps({
             '_uuid': self.uuid,
             '_uid': self.username_id,
@@ -508,7 +545,8 @@ class InstagramAPI:
             maxid) + '&rank_token=' + self.rank_token + '&ranked_content=true&')
 
     def search_location(self, query):
-        locationFeed = self._send_request('fbsearch/places/?rank_token=' + str(self.rank_token) + '&query=' + str(query))
+        locationFeed = self._send_request(
+            'fbsearch/places/?rank_token=' + str(self.rank_token) + '&query=' + str(query))
         # TODO Instagram.php 1250-1270
         return locationFeed
 
@@ -767,4 +805,3 @@ class InstagramAPI:
 
         for k, v in data.get('session').items():
             self.s.cookies.set(k, v)
-
