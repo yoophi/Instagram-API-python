@@ -207,7 +207,7 @@ class InstagramAPI:
                     self.timeline_feed()
                     self.get_v2_inbox()
                     self.get_recent_activity()
-                    print ("Login success!\n")
+                    print("Login success!\n")
                     return True;
 
     def sync_features(self):
@@ -440,7 +440,7 @@ class InstagramAPI:
             'external_url': url,
             'phone_number': phone,
             'username': self.username,
-            'full_name': first_name,
+            'first_name': first_name,
             'biography': biography,
             'email': email,
             'gender': gender,
